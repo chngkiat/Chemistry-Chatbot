@@ -17,7 +17,7 @@ typeQuery = 0
 question = list(map(lambda x: str(x),list(range(1,6))))
 
 '''Restricted List'''
-LIST_OF_ADMINS = [251046514]
+LIST_OF_ADMINS = []
 
 def restricted(func):
     @wraps(func)
