@@ -8,7 +8,7 @@ from functools import wraps
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
 
-botToken = '741258542:AAFy3s30tO-LDaG4SxpmAysFjY5EWFiRreg'
+botToken = ''
 URL =  "https://api.telegram.org/bot{}/".format(botToken)
 bot = telegram.Bot(token = botToken)
 update = Updater(botToken)
@@ -19,7 +19,7 @@ setup_flag = False
 question = list(map(lambda x: str(x),list(range(1,6))))
 
 '''Restricted List'''
-LIST_OF_ADMINS = [251046514]
+LIST_OF_ADMINS = []
 
 def restricted(func):
     @wraps(func)
