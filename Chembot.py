@@ -14,10 +14,12 @@ bot = telegram.Bot(token = botToken)
 update = Updater(botToken)
 dispatcher = update.dispatcher
 typeQuery = 0
+question_string = list(map(lambda x: str(x),range(1000)))
+setup_flag = False
 question = list(map(lambda x: str(x),list(range(1,6))))
 
 '''Restricted List'''
-LIST_OF_ADMINS = []
+LIST_OF_ADMINS = [251046514]
 
 def restricted(func):
     @wraps(func)
@@ -50,11 +52,36 @@ def start(bot, update):
 def q1(bot,update):
     text = update.message.text
     global typeQuery
+    global setup_flag
+    global question
+    global query
     if text == 'Hint':
         typeQuery = 'Hint'
         bot.send_message(chat_id=update.message.chat_id,
                      text="Looking for a hint? Which Question?",
                      reply_markup = reply2)
+    elif setup_flag and text in question_string:
+        setup_qns = int(text)
+        question = list(map(lambda x: str(x),list(range(1,(setup_qns+1)))))
+        for i in range (setup_qns):
+            num = i+1
+            texty = "Please key in Hint for Question " + str(num)
+            bot.send_message(chat_id=update.message.chat_id,
+                    text= texty)
+            while update.message.reply_to_message:
+                if update.message.reply_to_message.contains('Hint:'):
+                    hint = update.message.reply_to_message.text
+                    print(hint)
+                    query[i] = {'Hint':hint, 'Answer':0}
+                    texty = "Please key in Answer for Question " + str(num)
+                    bot.send_message(chat_id=update.message.chat_id,
+                        text= texty,reply_markup = telegram.ForceReply())
+                while update.message.reply_to_message:
+                    if update.message.reply_to_message.contains('Answer:'):
+                        answer = update.message.reply_to_message.text
+                        print(answer)
+                        query[i]['Answer'] = answer
+        setup_flag = False
     elif text == 'Answer':
         typeQuery = 'Answer'
         bot.send_message(chat_id=update.message.chat_id,
@@ -64,7 +91,7 @@ def q1(bot,update):
         question_num = int(text)
         answer = query[question_num][typeQuery]
         bot.send_message(chat_id=update.message.chat_id,text= answer)
-
+    
 def unknown(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
 
@@ -74,26 +101,11 @@ def done(bot,update):
 
 @restricted
 def setup(bot,update):
-    question_string = list(map(lambda x: str(x),range(51)))
-    global query
-    setup_qns = 0
+    global setup_flag
+    setup_flag = True
     bot.send_message(chat_id=update.message.chat_id,
                      text="Setting up for next Tutorial? How many question?")
-    while update.message.text:
-        if update.message.text in question_string:
-            setup_qns = int(update.message.text)
-            for i in range (setup_qns):
-                num = i+1
-                texty = "Please key in Hint for Question " + str(num)
-                bot.send_message(chat_id=update.message.chat_id,
-                        text= texty)
-                hint = update.message.text
-                query[i] = {'Hint':hint, 'Answer':0}
-                texty = "Please key in Hint for Answer " + str(num)
-                bot.send_message(chat_id=update.message.chat_id,
-                        text= texty)
-                answer = update.message.text
-                query[i]['Answer'] = answer
+
 
 start_handler = CommandHandler(command = "start",callback = start)
 setup_handler = CommandHandler(command = "setup",callback = setup)
